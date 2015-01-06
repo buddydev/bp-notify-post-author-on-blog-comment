@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: BP Notify Post Author on Blog Comment
- * Plugin URI: http://buddydev.com/plugins/bp-notify-post-author-on-comment/
+ * Plugin URI: http://buddydev.com/plugins/bp-notify-post-author-on-blog-comment/
  * Author: Brajesh Singh
  * Author URI: http://buddydev.com/
  * Description: Notify the Blog post author of any new comment on their blog post
  * Version: 1.0.0
  * License: GPL
- * Date Updated: December 29, 2014
+ * Date Updated: January 05, 2015
  * Compatible with BuddyPress 2.0+ 
  */
 
