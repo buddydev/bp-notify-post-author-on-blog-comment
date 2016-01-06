@@ -5,10 +5,12 @@
  * Author: Brajesh Singh
  * Author URI: http://buddydev.com/
  * Description: Notify the Blog post author of any new comment on their blog post
- * Version: 1.0.0
+ * Version: 1.0.1
  * License: GPL
  * Date Updated: January 05, 2015
- * Compatible with BuddyPress 2.0+ 
+ * Compatible with BuddyPress 2.0+
+ * Text Domain: blog_comment_notifier
+ * Domain Path: /languages/
  */
 
 class DevB_Blog_Comment_Notifier {
@@ -18,7 +20,10 @@ class DevB_Blog_Comment_Notifier {
 	private $id = 'blog_comment_notifier';
 	
 	private function __construct() {
-		
+
+        // Load plugin text domain
+        add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+
 		add_action( 'bp_setup_globals', array( $this, 'setup_globals' ) );
 		
 		//On New comment
@@ -47,6 +52,15 @@ class DevB_Blog_Comment_Notifier {
 		return self::$instance;
 		
 	}
+
+    /**
+     * Load plugin text domain
+     *
+     * @hook action plugins_loaded
+     */
+    public function load_textdomain() {
+        load_plugin_textdomain( 'blog_comment_notifier', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+    }
 	
 	public function setup_globals() {
 		//BD: BuddyDev
@@ -213,9 +227,14 @@ class DevB_Blog_Comment_Notifier {
 		
 		if( strlen( $comment_content ) < strlen( $comment_content->comment_content ) )
 			$comment_content .=' ...';
-   
-		
-		$text = sprintf( '%s commented on <strong>%s</strong>: <em>%s</em>', $name, $post_title, $comment_content ); 
+
+
+        $text = sprintf(
+            __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'blog_comment_notifier' ),
+            $name,
+            $post_title,
+            $comment_content
+        );
 		
 		if( $comment->comment_approved == 1 )
 			$link = get_comment_link ( $comment );
