@@ -9,7 +9,7 @@
  * License: GPL
  * Date Updated: January 05, 2015
  * Compatible with BuddyPress 2.0+
- * Text Domain: blog_comment_notifier
+ * Text Domain: bp-notify-post-author-on-blog-comment
  * Domain Path: /languages/
  */
 
@@ -20,9 +20,6 @@ class DevB_Blog_Comment_Notifier {
 	private $id = 'blog_comment_notifier';
 	
 	private function __construct() {
-
-        // Load plugin text domain
-        add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 
 		add_action( 'bp_setup_globals', array( $this, 'setup_globals' ) );
 		
@@ -38,16 +35,20 @@ class DevB_Blog_Comment_Notifier {
 		//should we do something on the action untrash_comment & unspam_comment
 		
 		add_action( 'wp_set_comment_status', array( $this, 'comment_status_changed' ) );
+		
+		        // Load plugin text domain
+        add_action( 'bp_init', array( $this, 'load_textdomain' ) );
 	}
 	
 	/**
 	 * 
 	 * @return DevB_Blog_Comment_Notifier
 	 */
-	public static function get_instance(){
+	public static function get_instance() {
 		
-		if( ! isset( self::$instance ) )
+		if ( ! isset( self::$instance ) ) {
 			self::$instance = new self();
+		}
 		
 		return self::$instance;
 		
@@ -59,13 +60,14 @@ class DevB_Blog_Comment_Notifier {
      * @hook action plugins_loaded
      */
     public function load_textdomain() {
-        load_plugin_textdomain( 'blog_comment_notifier', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+        load_plugin_textdomain( 'bp-notify-post-author-on-blog-comment', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
     }
 	
 	public function setup_globals() {
 		//BD: BuddyDev
-		if( ! defined( 'BD_BLOG_NOTIFIER_SLUG' ) )
+		if ( ! defined( 'BD_BLOG_NOTIFIER_SLUG' ) ) {
 			define( 'BD_BLOG_NOTIFIER_SLUG', 'bd-blog-notifier' );
+		}
 		
 		$bp = buddypress();
 		
@@ -75,7 +77,7 @@ class DevB_Blog_Comment_Notifier {
 		$bp->blog_comment_notifier->notification_callback = array( $this, 'format_notifications' );//show the notification
     
 		/* Register this in the active components array */
-		$bp->active_components[$bp->blog_comment_notifier->id] = $bp->blog_comment_notifier->id;
+		$bp->active_components[ $bp->blog_comment_notifier->id ] = $bp->blog_comment_notifier->id;
 
 		do_action( 'blog_comment_notifier_setup_globals' );
 	}
@@ -90,14 +92,16 @@ class DevB_Blog_Comment_Notifier {
 	 */
 	public function comment_posted( $comment_id = 0, $comment_status = 0 ) {
 		
-		if( ! $this->is_bp_active() )
+		if ( ! $this->is_bp_active() ) {
 			return ;
+		}
 		
 		$comment = get_comment( $comment_id );
 		
 		//if the comment does not exists(not likely), or if the comment is marked as spam, we don't take any action
-		if ( empty( $comment ) || $comment->comment_approved == 'spam' )
+		if ( empty( $comment ) || $comment->comment_approved == 'spam' ) {
 			return ;
+		}
 		
 		//should we handle trackback? currently we don't
 		if ( $comment->comment_type == 'trackback' || $comment->comment_type == 'pingback'  ) {
@@ -110,12 +114,14 @@ class DevB_Blog_Comment_Notifier {
 		$post = get_post( $post_id );
 		
 		//no need to generate any notification if an author is making comment
-		if( $post->post_author == $comment->user_id )
+		if ( $post->post_author == $comment->user_id ) {
 			return ;
+		}
 		
 		//can the post author moderate comment?
-		if( ! user_can( $post->post_author, 'moderate_comments'  ) && $comment->comment_approved ==0  )
+		if ( ! user_can( $post->post_author, 'moderate_comments'  ) && $comment->comment_approved == 0  ) {
 			return;
+		}
 		//if we are here, we must provide a notification to the author of the post
 						
 		$this->notify( $post->post_author, $comment );
@@ -132,42 +138,43 @@ class DevB_Blog_Comment_Notifier {
 	 */
 	public function comment_status_changed( $comment_id = 0, $comment_status = 0 ) {
 		
-		if( ! $this->is_bp_active() )
+		if ( ! $this->is_bp_active() ) {
 			return ;
+		}
 		
 		$comment = get_comment( $comment_id );
 		
-		
-		
-		if( empty( $comment ) )
+		if ( empty( $comment ) ) {
 			return ;
+		}
 
-	
-		
 		//we are only interested in 2 cases
 		//1. comment is notified and then it was marked as deleted or spam?
-		if(  $comment->comment_approved == 'spam' || $comment->comment_approve == 'trash'  ) {
+		if (  $comment->comment_approved == 'spam' || $comment->comment_approve == 'trash'  ) {
 			
-			if( $this->is_notified( $comment_id ) )
+			if ( $this->is_notified( $comment_id ) ) {
 				$this->comment_deleted( $comment_id );
+			}
 			
 			return;
 		}
+		
 		//if an apprived comment is marked as pending,  delete notification
-		if( $comment->comment_approve == 0 && $this->is_notified( $comment_id ) ) {
+		if ( $comment->comment_approve == 0 && $this->is_notified( $comment_id ) ) {
 			$this->comment_deleted( $comment_id );
 			return ;
 			
 		}
 		
-		if( $comment->comment_approve == 1 ) {
+		if ( $comment->comment_approve == 1 ) {
 			
 			$post = get_post( $comment->comment_post_ID );
 			
-			if( get_current_user_id() == $post->post_author ) {
+			if ( get_current_user_id() == $post->post_author ) {
 				
-				if( $this->is_notified( $comment_id ) )
+				if ( $this->is_notified( $comment_id ) ) {
 					$this->comment_deleted ( $comment_id );
+				}
 				
 				return ;
 				
@@ -188,10 +195,11 @@ class DevB_Blog_Comment_Notifier {
 	public function comment_deleted( $comment_id ) {
 		
 		
-		if( ! $this->is_bp_active() )
+		if ( ! $this->is_bp_active() ) {
 			return;
+		}
 		
-		bp_notifications_delete_all_notifications_by_type($comment_id, $this->id );
+		bp_notifications_delete_all_notifications_by_type( $comment_id, $this->id );
 		
 		$this->unmark_notified( $comment_id );
 	}
@@ -207,7 +215,6 @@ class DevB_Blog_Comment_Notifier {
 	 */
 	public function format_notifications( $action, $comment_id, $secondary_item_id, $total_items, $format = 'string' ) {
    
-    
 		$bp = buddypress();
 		
 		$comment = get_comment( $comment_id );
@@ -216,41 +223,43 @@ class DevB_Blog_Comment_Notifier {
 		
 		$link = $text = $name = $post_title = $comment_content ='';
 		
-		if( $comment->user_id )
+		if ( $comment->user_id ) {
 			$name = bp_core_get_user_displayname ( $comment->user_id );
-		else
+		} else {
 			$name = $comment->comment_author;
+		}
 		
 		$post_title = $post->post_title;
 		
 		$comment_content = wp_trim_words( $comment->comment_content, 12, ' ...' );
 
         $text = sprintf(
-            __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'blog_comment_notifier' ),
+            __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'bp-notify-post-author-on-blog-comment' ),
             $name,
             $post_title,
             $comment_content
         );
 		
-		if( $comment->comment_approved == 1 )
+		if ( $comment->comment_approved == 1 ) {
 			$link = get_comment_link ( $comment );
-		else
+		} else {
 			$link =admin_url( 'comment.php?action=approve&c=' . $comment_id );
+		}
 		
-     if( $format == 'string' ) {
+		if ( $format == 'string' ) {
 		
 		 return apply_filters( 'bp_blog_notieifier_new_comment_notification_string', '<a href="' . $link . '">' . $text . '</a>' );
 		
-     }else{
+		}else{
 		 
         return array(
                 'link'  => $link,
                 'text'  => $text);
      
-    }
+		}
     
 	return false;
-}
+	}
 
 	/**
 	 * Is BuddyPress Active
@@ -260,8 +269,10 @@ class DevB_Blog_Comment_Notifier {
 	 */
 	public function is_bp_active() {
 		
-		if( function_exists( 'buddypress' ) )
+		if ( function_exists( 'buddypress' ) ) {
 			return true;
+		}
+		
 		return false;
 	}
 	
@@ -306,7 +317,7 @@ class DevB_Blog_Comment_Notifier {
                    'component_name'     => $this->id,
                    'component_action'   => 'new_blog_comment_'. $comment_id
                    
-                   ));
+                ));
 
 		$this->mark_notified( $comment_id );
 		

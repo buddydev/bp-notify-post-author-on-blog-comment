@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: BP Notify Post Author on Blog Comment\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: Wed Jan 06 2016 16:51:09 GMT+0100 (CET)\n"
-"PO-Revision-Date: Wed Jan 06 2016 17:04:24 GMT+0100 (CET)\n"
+"POT-Creation-Date: Wed Jan 06 2016 19:32:39 GMT+0100 (CET)\n"
+"PO-Revision-Date: Wed Jan 06 2016 19:33:24 GMT+0100 (CET)\n"
 "Last-Translator: Bazalt <contact@bazalt.fr>\n"
 "Language-Team: \n"
 "Language: French (France)\n"
@@ -44,7 +44,7 @@ msgstr ""
 "Envoie une notification BuddyPress aux auteurs dès qu'un commentaire est "
 "publié sur un de leurs articles"
 
-#: ../bp-blog-comment-notifier.php:232
+#: ../bp-blog-comment-notifier.php:237
 #, php-format
 msgid "%s commented on <strong>%s</strong>: <em>%s</em>"
 msgstr "%s a commenté <strong>%s</strong> : <em>%s</em>"
