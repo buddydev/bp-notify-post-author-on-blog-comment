@@ -44,10 +44,11 @@ class DevB_Blog_Comment_Notifier {
 	 * 
 	 * @return DevB_Blog_Comment_Notifier
 	 */
-	public static function get_instance(){
+	public static function get_instance() {
 		
-		if( ! isset( self::$instance ) )
+		if ( ! isset( self::$instance ) ) {
 			self::$instance = new self();
+		}
 		
 		return self::$instance;
 		
@@ -59,7 +60,7 @@ class DevB_Blog_Comment_Notifier {
      * @hook action plugins_loaded
      */
     public function load_textdomain() {
-        load_plugin_textdomain( 'blog_comment_notifier', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+        load_plugin_textdomain( 'bp-notify-post-author-on-blog-comment', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
     }
 	
 	public function setup_globals() {
@@ -230,7 +231,7 @@ class DevB_Blog_Comment_Notifier {
 
 
         $text = sprintf(
-            __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'blog_comment_notifier' ),
+            __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'bp-notify-post-author-on-blog-comment' ),
             $name,
             $post_title,
             $comment_content
