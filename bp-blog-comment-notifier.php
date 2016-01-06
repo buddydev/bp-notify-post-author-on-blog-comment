@@ -231,13 +231,8 @@ class DevB_Blog_Comment_Notifier {
 		
 		$post_title = $post->post_title;
 		
-		$comment_content = wp_trim_words( $comment->comment_content, 12 );
+		$comment_content = wp_trim_words( $comment->comment_content, 12,  ' ...' );
 		
-		if ( strlen( $comment_content ) < strlen( $comment_content->comment_content ) ) {
-			$comment_content .= ' ...';
-		}
-
-
         $text = sprintf(
             __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'bp-notify-post-author-on-blog-comment' ),
             $name,
