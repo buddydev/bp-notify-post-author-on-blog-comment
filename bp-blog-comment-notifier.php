@@ -21,9 +21,6 @@ class DevB_Blog_Comment_Notifier {
 	
 	private function __construct() {
 
-        // Load plugin text domain
-        add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-
 		add_action( 'bp_setup_globals', array( $this, 'setup_globals' ) );
 		
 		//On New comment
@@ -38,6 +35,9 @@ class DevB_Blog_Comment_Notifier {
 		//should we do something on the action untrash_comment & unspam_comment
 		
 		add_action( 'wp_set_comment_status', array( $this, 'comment_status_changed' ) );
+		
+		        // Load plugin text domain
+        add_action( 'bp_init', array( $this, 'load_textdomain' ) );
 	}
 	
 	/**
