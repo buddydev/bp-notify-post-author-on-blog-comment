@@ -9,7 +9,7 @@
  * License: GPL
  * Date Updated: January 05, 2015
  * Compatible with BuddyPress 2.0+
- * Text Domain: blog_comment_notifier
+ * Text Domain: bp-notify-post-author-on-blog-comment
  * Domain Path: /languages/
  */
 
