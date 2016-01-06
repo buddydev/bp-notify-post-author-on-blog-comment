@@ -71,7 +71,7 @@ class DevB_Blog_Comment_Notifier {
 		
 		$bp->blog_comment_notifier = new stdClass();
 		$bp->blog_comment_notifier->id = $this->id;//I asume others are not going to use this is
-		$bp->blog_comment_notifier->slug = BP_ACTIVITY_NOTIFIER_SLUG;
+		$bp->blog_comment_notifier->slug = BD_BLOG_NOTIFIER_SLUG;
 		$bp->blog_comment_notifier->notification_callback = array( $this, 'format_notifications' );//show the notification
     
 		/* Register this in the active components array */
@@ -223,11 +223,7 @@ class DevB_Blog_Comment_Notifier {
 		
 		$post_title = $post->post_title;
 		
-		$comment_content = wp_trim_words( $comment->comment_content, 12 );
-		
-		if( strlen( $comment_content ) < strlen( $comment_content->comment_content ) )
-			$comment_content .=' ...';
-
+		$comment_content = wp_trim_words( $comment->comment_content, 12, ' ...' );
 
         $text = sprintf(
             __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'blog_comment_notifier' ),
