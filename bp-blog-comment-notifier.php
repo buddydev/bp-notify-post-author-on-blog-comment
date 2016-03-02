@@ -5,10 +5,8 @@
  * Author: Brajesh Singh
  * Author URI: http://buddydev.com/
  * Description: Notify the Blog post author of any new comment on their blog post
- * Version: 1.0.1
+ * Version: 1.0.2
  * License: GPL
- * Date Updated: January 05, 2015
- * Compatible with BuddyPress 2.0+
  * Text Domain: bp-notify-post-author-on-blog-comment
  * Domain Path: /languages/
  */
@@ -26,7 +24,7 @@ class DevB_Blog_Comment_Notifier {
 		//On New comment
 		add_action( 'comment_post', array( $this, 'comment_posted' ), 15, 2 );
 		//on delete post, we should delete all notifications for the comment on that post
-		add_action( 'delete_post', array( $this, 'post_deleted' ), 10, 2 );
+		//add_action( 'delete_post', array( $this, 'post_deleted' ), 10, 2 );
 
 		// Monitor actions on existing comments
 		add_action( 'deleted_comment', array( $this, 'comment_deleted' ) );
