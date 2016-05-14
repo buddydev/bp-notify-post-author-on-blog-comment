@@ -36,6 +36,7 @@ class DevB_Blog_Comment_Notifier {
 		
 		        // Load plugin text domain
         add_action( 'bp_init', array( $this, 'load_textdomain' ) );
+		add_action( 'template_redirect', array( $this, 'mark_read' ) );
 	}
 	
 	/**
@@ -313,13 +314,35 @@ class DevB_Blog_Comment_Notifier {
                    'item_id'            => $comment_id,
                    'user_id'            => $user_id,
                    'component_name'     => $this->id,
-                   'component_action'   => 'new_blog_comment_'. $comment_id
-                   
+                   'component_action'   => 'new_blog_comment_'. $comment_id,
+                   'secondary_item_id'  => $comment->comment_post_ID,
                 ));
 
 		$this->mark_notified( $comment_id );
 		
 		
+	}
+
+	public function mark_read() {
+
+		if ( ! is_singular() ) {
+			return ;
+		}
+
+		$post_id = get_queried_object_id();
+
+		if ( ! $post_id ) {
+			return ;
+		}
+
+
+		BP_Notifications_Notification::delete( array(
+			'secondary_item_id' => $post_id,
+			'component_name'    => $this->id,
+			'user_id'           => get_current_user_id(),
+		) );
+
+
 	}
 	
 	//we need to delete all notification for the user when he/she visits the single blog post?
