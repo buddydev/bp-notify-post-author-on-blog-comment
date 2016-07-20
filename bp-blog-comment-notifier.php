@@ -353,10 +353,16 @@ class DevB_Blog_Comment_Notifier {
 
 
 		BP_Notifications_Notification::delete( array(
-			'secondary_item_id' => $post_id,
-			'component_name'    => $this->id,
-			'user_id'           => get_current_user_id(),
+
 		) );
+
+		return BP_Notifications_Notification::update(
+			array( 'is_new' => 0 ),
+			array( 'secondary_item_id' => $post_id,
+			       'component_name'    => $this->id,
+			       'user_id'           => get_current_user_id(),
+				)
+			);
 
 
 	}
