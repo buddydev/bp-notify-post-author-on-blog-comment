@@ -212,7 +212,7 @@ class DevB_Blog_Comment_Notifier {
 	 * @param string $format
 	 * @return mixed
 	 */
-	public function format_notifications( $action, $comment_id, $secondary_item_id, $total_items, $format = 'string' ) {
+	public function format_notifications( $action, $comment_id, $secondary_item_id, $total_items, $format = 'string',  $notification_id = 0 ) {
    
 		$bp = buddypress();
 		
@@ -309,7 +309,7 @@ class DevB_Blog_Comment_Notifier {
 	public function notify( $user_id, $comment ) {
 	
 		$comment_id = $comment->comment_ID;
-		bp_notifications_add_notification( array(
+		$notificatin_id = bp_notifications_add_notification( array(
                    
                    'item_id'            => $comment_id,
                    'user_id'            => $user_id,
@@ -318,6 +318,10 @@ class DevB_Blog_Comment_Notifier {
                    'secondary_item_id'  => $comment->comment_post_ID,
                 ));
 
+		if ( $notificatin_id && is_multisite() ) {
+			bp_notifications_add_meta( $notificatin_id, '_blog_id', get_current_blog_id() );
+		}
+		
 		$this->mark_notified( $comment_id );
 		
 		
