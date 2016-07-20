@@ -215,7 +215,13 @@ class DevB_Blog_Comment_Notifier {
 	public function format_notifications( $action, $comment_id, $secondary_item_id, $total_items, $format = 'string',  $notification_id = 0 ) {
    
 		$bp = buddypress();
-		
+		$switched = false;
+		$blog_id = bp_notifications_get_meta( $notification_id, '_blog_id' );
+
+		if ( $blog_id && get_current_blog_id() != $blog_id ) {
+			switch_to_blog( $blog_id );
+			$switched = true;
+		}
 		$comment = get_comment( $comment_id );
 		
 		$post = get_post( $comment->comment_post_ID);
@@ -240,11 +246,17 @@ class DevB_Blog_Comment_Notifier {
         );
 		
 		if ( $comment->comment_approved == 1 ) {
-			$link = get_comment_link ( $comment );
+
+				$link = get_comment_link ( $comment );
+
 		} else {
 			$link =admin_url( 'comment.php?action=approve&c=' . $comment_id );
 		}
-		
+
+		if( $switched ) {
+			restore_current_blog();
+		}
+
 		if ( $format == 'string' ) {
 		
 		 return apply_filters( 'bp_blog_notieifier_new_comment_notification_string', '<a href="' . $link . '">' . $text . '</a>' );
