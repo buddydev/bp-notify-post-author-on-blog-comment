@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: BP Notify Post Author on Blog Comment
- * Plugin URI: http://buddydev.com/plugins/bp-notify-post-author-on-blog-comment/
- * Author: Brajesh Singh
- * Author URI: http://buddydev.com/
+ * Plugin Name: BuddyPress Notify Post Author on Blog Comment
+ * Plugin URI: https://buddydev.com/plugins/bp-notify-post-author-on-blog-comment/
+ * Author: BuddyDev Team
+ * Author URI: https://buddydev.com/
  * Description: Notify the Blog post author of any new comment on their blog post
- * Version: 1.0.2
+ * Version: 1.0.3
  * License: GPL
  * Text Domain: bp-notify-post-author-on-blog-comment
  * Domain Path: /languages/
@@ -33,8 +33,8 @@ class DevB_Blog_Comment_Notifier {
 		//should we do something on the action untrash_comment & unspam_comment
 		
 		add_action( 'wp_set_comment_status', array( $this, 'comment_status_changed' ) );
-		
-		        // Load plugin text domain
+
+		// Load plugin text domain
         add_action( 'bp_init', array( $this, 'load_textdomain' ) );
 		add_action( 'template_redirect', array( $this, 'mark_read' ) );
 	}
@@ -85,9 +85,9 @@ class DevB_Blog_Comment_Notifier {
 	/**
 	 * Notify when  a comment is posted
 	 * 
-	 * @param type $comment_id
-	 * @param type $comment_status
-	 * @return type
+	 * @param int $comment_id
+	 * @param  $comment_status
+	 * @return null
 	 */
 	public function comment_posted( $comment_id = 0, $comment_status = 0 ) {
 		
@@ -131,8 +131,8 @@ class DevB_Blog_Comment_Notifier {
 	/**
 	 * When a comment status changes, we check for the notification and also 
 	 * think about changing the read link?
-	 * @param type $comment_id
-	 * @param type $comment_status
+	 * @param int $comment_id
+	 * @param int $comment_status
 	 * 
 	 */
 	public function comment_status_changed( $comment_id = 0, $comment_status = 0 ) {
@@ -301,7 +301,7 @@ class DevB_Blog_Comment_Notifier {
 	/**
 	 * Mark that a comment was notified to the post author
 	 * 
-	 * @param type $comment_id
+	 * @param int $comment_id
 	 */
 	public function mark_notified( $comment_id ) {
 		
@@ -311,7 +311,7 @@ class DevB_Blog_Comment_Notifier {
 	/**
 	 * Delete the notification mark meta
 	 * 
-	 * @param type $comment_id
+	 * @param int $comment_id
 	 */
 	public function unmark_notified( $comment_id ) {
 		
