@@ -2,10 +2,10 @@
 /**
  * Plugin Name: BuddyPress Notify Post Author on Blog Comment
  * Plugin URI: https://buddydev.com/plugins/bp-notify-post-author-on-blog-comment/
- * Author: BuddyDev Team
+ * Author: BuddyDev
  * Author URI: https://buddydev.com/
  * Description: Notify the Blog post author of any new comment on their blog post
- * Version: 1.0.3
+ * Version: 1.0.4
  * License: GPL
  * Text Domain: bp-notify-post-author-on-blog-comment
  * Domain Path: /languages/
@@ -350,11 +350,6 @@ class DevB_Blog_Comment_Notifier {
 		if ( ! $post_id ) {
 			return ;
 		}
-
-
-		BP_Notifications_Notification::delete( array(
-
-		) );
 
 		return BP_Notifications_Notification::update(
 			array( 'is_new' => 0 ),
