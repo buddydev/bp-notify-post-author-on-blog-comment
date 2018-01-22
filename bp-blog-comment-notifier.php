@@ -111,21 +111,63 @@ class DevB_Blog_Comment_Notifier {
 		$post_id = $comment->comment_post_ID;
 		
 		$post = get_post( $post_id );
-		
+
+		$this->notifiy_post_author( $post, $comment );
+
+		$this->notifiy_comment_parent_author( $post, $comment );
+
+	}
+
+	public function notifiy_post_author( $post, $comment ) {
+
 		//no need to generate any notification if an author is making comment
 		if ( $post->post_author == $comment->user_id ) {
 			return ;
 		}
 		
 		//can the post author moderate comment?
-		if ( ! user_can( $post->post_author, 'moderate_comments'  ) && $comment->comment_approved == 0  ) {
-			return;
+		if ( ! user_can( $post->post_author, 'moderate_comments'  ) && $comment->comment_approved == 0 ) {
+			return ;
 		}
 		//if we are here, we must provide a notification to the author of the post
 						
 		$this->notify( $post->post_author, $comment );
-		
-		
+
+	}
+
+	public function notifiy_comment_parent_author( $post, $comment ) {
+
+		//if this is not a reply to another comment, do nothing
+		if ( ! $comment->comment_parent ) {
+			return ;
+		}
+
+		$parent_comment = get_comment( $comment->comment_parent );
+
+		//if the comment does not exists(not likely), or if the comment is marked as spam, we don't take any action
+		if ( empty( $parent_comment ) || $parent_comment->comment_approved == 'spam' ) {
+			return ;
+		}
+
+		//if the parent comment does not come from a registered user, do nothing
+		if ( ! $parent_comment->user_id ) {
+			return ;
+		}
+
+		//no need to generate any notification if the author made the parent comment
+		if ( $post->post_author == $parent_comment->user_id ) {
+			return ;
+		}
+
+		//can the parent comments author moderate comment?
+		if ( ! user_can( $parent_comment->user_id, 'moderate_comments'  ) && $comment->comment_approved == 0 ) {
+			return;
+		}
+
+		//if we are here, we must provide a notification to the author of the parent comment
+
+		$this->notify( $parent_comment->user_id, $comment );
+
 	}
 
 	/**
@@ -157,8 +199,8 @@ class DevB_Blog_Comment_Notifier {
 			
 			return;
 		}
-		
-		//if an apprived comment is marked as pending,  delete notification
+
+		//if an approved comment is marked as pending,  delete notification
 		if ( $comment->comment_approve == 0 && $this->is_notified( $comment_id ) ) {
 			$this->comment_deleted( $comment_id );
 			return ;
@@ -180,8 +222,10 @@ class DevB_Blog_Comment_Notifier {
 			} else {
 				
 				//if approver is not the author
-				
-				$this->notify( $post->post_author, $comment );
+
+				$this->notifiy_post_author( $post, $comment );
+
+				$this->notifiy_comment_parent_author( $post, $comment );
 			}
 			
 		}
@@ -237,14 +281,28 @@ class DevB_Blog_Comment_Notifier {
 		$post_title = $post->post_title;
 		
 		$comment_content = wp_trim_words( $comment->comment_content, 12,  ' ...' );
-		
-        $text = sprintf(
-            __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'bp-notify-post-author-on-blog-comment' ),
-            $name,
-            $post_title,
-            $comment_content
-        );
-		
+
+		if ( $comment->comment_parent &&
+			( $parent_comment = get_comment( $comment->comment_parent ) ) &&
+			get_current_user_id() == $parent_comment->user_id ) {
+
+			$text = sprintf(
+	            __( '%s replied to your comment on <strong>%s</strong>: <em>%s</em>', 'bp-notify-post-author-on-blog-comment' ),
+	            $name,
+	            $post_title,
+	            $comment_content
+	        );
+
+		} else {
+
+	        $text = sprintf(
+	            __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'bp-notify-post-author-on-blog-comment' ),
+	            $name,
+	            $post_title,
+	            $comment_content
+	        );
+	    }
+
 		if ( $comment->comment_approved == 1 ) {
 
 				$link = get_comment_link ( $comment );
