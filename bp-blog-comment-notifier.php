@@ -11,37 +11,19 @@
  * Domain Path: /languages/
  */
 
-class DevB_Blog_Comment_Notifier {
-	
+class BDBP_Blog_Comment_Notifier {
+
 	private static $instance;
 	
 	private $id = 'blog_comment_notifier';
 	
 	private function __construct() {
-
-		add_action( 'bp_setup_globals', array( $this, 'setup_globals' ) );
-		
-		//On New comment
-		add_action( 'comment_post', array( $this, 'comment_posted' ), 15, 2 );
-		//on delete post, we should delete all notifications for the comment on that post
-		//add_action( 'delete_post', array( $this, 'post_deleted' ), 10, 2 );
-
-		// Monitor actions on existing comments
-		add_action( 'deleted_comment', array( $this, 'comment_deleted' ) );
-		//add_action( 'trashed_comment', array( $this, 'comment_deleted' ) );
-		//add_action( 'spam_comment', array( $this, 'comment_deleted' ) );
-		//should we do something on the action untrash_comment & unspam_comment
-		
-		add_action( 'wp_set_comment_status', array( $this, 'comment_status_changed' ) );
-
-		// Load plugin text domain
-        add_action( 'bp_init', array( $this, 'load_textdomain' ) );
-		add_action( 'template_redirect', array( $this, 'mark_read' ) );
+	    $this->setup();
 	}
 	
 	/**
 	 * 
-	 * @return DevB_Blog_Comment_Notifier
+	 * @return BDBP_Blog_Comment_Notifier
 	 */
 	public static function get_instance() {
 		
@@ -52,6 +34,31 @@ class DevB_Blog_Comment_Notifier {
 		return self::$instance;
 		
 	}
+
+    /**
+     * Setup necessary hooks
+     */
+	public function setup() {
+
+        add_action( 'bp_setup_globals', array( $this, 'setup_globals' ) );
+
+        //On New comment
+        add_action( 'comment_post', array( $this, 'comment_posted' ), 15, 2 );
+        //on delete post, we should delete all notifications for the comment on that post
+        //add_action( 'delete_post', array( $this, 'post_deleted' ), 10, 2 );
+
+        // Monitor actions on existing comments
+        add_action( 'deleted_comment', array( $this, 'comment_deleted' ) );
+        //add_action( 'trashed_comment', array( $this, 'comment_deleted' ) );
+        //add_action( 'spam_comment', array( $this, 'comment_deleted' ) );
+        //should we do something on the action untrash_comment & unspam_comment
+
+        add_action( 'wp_set_comment_status', array( $this, 'comment_status_changed' ) );
+
+        // Load plugin text domain
+        add_action( 'bp_init', array( $this, 'load_textdomain' ) );
+        add_action( 'template_redirect', array( $this, 'mark_read' ) );
+    }
 
     /**
      * Load plugin text domain
@@ -341,7 +348,8 @@ class DevB_Blog_Comment_Notifier {
 
 	public function mark_read() {
 
-		if ( ! is_singular() ) {
+
+        if ( ! $this->is_bp_active() || ! is_singular() ) {
 			return ;
 		}
 
@@ -368,4 +376,4 @@ class DevB_Blog_Comment_Notifier {
 	
 }
 //initialize
-DevB_Blog_Comment_Notifier::get_instance();
+BDBP_Blog_Comment_Notifier::get_instance();
