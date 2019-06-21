@@ -11,18 +11,40 @@
  * Domain Path: /languages/
  */
 
+// No direct access.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Class BDBP_Blog_Comment_Notifier
+ */
 class BDBP_Blog_Comment_Notifier {
 
+	/**
+	 * Class instance
+	 *
+	 * @var BDBP_Blog_Comment_Notifier
+	 */
 	private static $instance;
-	
+
+	/**
+	 * Id
+	 *
+	 * @var string
+	 */
 	private $id = 'blog_comment_notifier';
-	
+
+	/**
+	 * BDBP_Blog_Comment_Notifier constructor.
+	 */
 	private function __construct() {
 	    $this->setup();
 	}
 	
 	/**
-	 * 
+	 * Class instance
+	 *
 	 * @return BDBP_Blog_Comment_Notifier
 	 */
 	public static function get_instance() {
@@ -32,14 +54,12 @@ class BDBP_Blog_Comment_Notifier {
 		}
 		
 		return self::$instance;
-		
 	}
 
     /**
      * Setup necessary hooks
      */
 	public function setup() {
-
         add_action( 'bp_setup_globals', array( $this, 'setup_globals' ) );
 
         //On New comment
@@ -68,7 +88,10 @@ class BDBP_Blog_Comment_Notifier {
     public function load_textdomain() {
         load_plugin_textdomain( 'bp-notify-post-author-on-blog-comment', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
     }
-	
+
+	/**
+	 * Setup globals
+	 */
 	public function setup_globals() {
 		//BD: BuddyDev
 		if ( ! defined( 'BD_BLOG_NOTIFIER_SLUG' ) ) {
@@ -76,24 +99,24 @@ class BDBP_Blog_Comment_Notifier {
 		}
 		
 		$bp = buddypress();
-		
-		$bp->blog_comment_notifier = new stdClass();
-		$bp->blog_comment_notifier->id = $this->id;//I asume others are not going to use this is
-		$bp->blog_comment_notifier->slug = BD_BLOG_NOTIFIER_SLUG;
-		$bp->blog_comment_notifier->notification_callback = array( $this, 'format_notifications' );//show the notification
+
+		$bp->blog_comment_notifier                        = new stdClass();
+		$bp->blog_comment_notifier->id                    = $this->id;//I asume others are not going to use this is.
+		$bp->blog_comment_notifier->slug                  = BD_BLOG_NOTIFIER_SLUG;
+		$bp->blog_comment_notifier->notification_callback = array( $this, 'format_notifications' ); //show the notification.
     
 		/* Register this in the active components array */
 		$bp->active_components[ $bp->blog_comment_notifier->id ] = $bp->blog_comment_notifier->id;
 
 		do_action( 'blog_comment_notifier_setup_globals' );
 	}
-	
 
 	/**
 	 * Notify when  a comment is posted
 	 * 
-	 * @param int $comment_id
-	 * @param  $comment_status
+	 * @param int        $comment_id Comment id.
+	 * @param int|string $comment_status 1 if the comment is approved, 0 if not, 'spam' if spam.
+	 *
 	 * @return null
 	 */
 	public function comment_posted( $comment_id = 0, $comment_status = 0 ) {
@@ -113,8 +136,7 @@ class BDBP_Blog_Comment_Notifier {
 		if ( $comment->comment_type == 'trackback' || $comment->comment_type == 'pingback'  ) {
 			return ;
 		}
-		
-		
+
 		$post_id = $comment->comment_post_ID;
 		
 		$post = get_post( $post_id );
@@ -128,30 +150,30 @@ class BDBP_Blog_Comment_Notifier {
 		if ( ! user_can( $post->post_author, 'moderate_comments'  ) && $comment->comment_approved == 0  ) {
 			return;
 		}
+
 		//if we are here, we must provide a notification to the author of the post
-						
 		$this->notify( $post->post_author, $comment );
-		
-		
 	}
 
 	/**
 	 * When a comment status changes, we check for the notification and also 
 	 * think about changing the read link?
-	 * @param int $comment_id
-	 * @param int $comment_status
-	 * 
+	 *
+	 * @param int        $comment_id Comment id.
+	 * @param int|string $comment_status 1 if the comment is approved, 0 if not, 'spam' if spam.
+	 *
+	 * @return mixed
 	 */
 	public function comment_status_changed( $comment_id = 0, $comment_status = 0 ) {
 		
 		if ( ! $this->is_bp_active() ) {
-			return ;
+			return;
 		}
 		
 		$comment = get_comment( $comment_id );
 		
 		if ( empty( $comment ) ) {
-			return ;
+			return;
 		}
 
 		//we are only interested in 2 cases
@@ -168,12 +190,11 @@ class BDBP_Blog_Comment_Notifier {
 		//if an apprived comment is marked as pending,  delete notification
 		if ( $comment->comment_approve == 0 && $this->is_notified( $comment_id ) ) {
 			$this->comment_deleted( $comment_id );
-			return ;
-			
+
+			return;
 		}
 		
 		if ( $comment->comment_approve == 1 ) {
-			
 			$post = get_post( $comment->comment_post_ID );
 			
 			if ( get_current_user_id() == $post->post_author ) {
@@ -182,25 +203,21 @@ class BDBP_Blog_Comment_Notifier {
 					$this->comment_deleted ( $comment_id );
 				}
 				
-				return ;
-				
+				return;
 			} else {
-				
 				//if approver is not the author
-				
 				$this->notify( $post->post_author, $comment );
 			}
-			
 		}
-		
 	}
+
 	/**
 	 * On Comment Delete
-	 * @param type $comment_id
+	 *
+	 * @param int $comment_id Comment id.
 	 */
 	public function comment_deleted( $comment_id ) {
-		
-		
+
 		if ( ! $this->is_bp_active() ) {
 			return;
 		}
@@ -209,29 +226,31 @@ class BDBP_Blog_Comment_Notifier {
 		
 		$this->unmark_notified( $comment_id );
 	}
+
 	/**
 	 * Generate human readable notification
 	 *  
-	 * @param string $action
-	 * @param string $comment_id
-	 * @param string $secondary_item_id
-	 * @param string $total_items
-	 * @param string $format
+	 * @param string $action            Notification action.
+	 * @param string $comment_id        Comment id.
+	 * @param string $secondary_item_id Secondary item id.
+	 * @param string $total_items       Total items.
+	 * @param string $format            Notification format.
+	 *
 	 * @return mixed
 	 */
 	public function format_notifications( $action, $comment_id, $secondary_item_id, $total_items, $format = 'string',  $notification_id = 0 ) {
-   
-		$bp = buddypress();
+		$bp       = buddypress();
 		$switched = false;
+
 		$blog_id = bp_notifications_get_meta( $notification_id, '_blog_id' );
 
 		if ( $blog_id && get_current_blog_id() != $blog_id ) {
 			switch_to_blog( $blog_id );
 			$switched = true;
 		}
+
 		$comment = get_comment( $comment_id );
-		
-		$post = get_post( $comment->comment_post_ID);
+		$post    = get_post( $comment->comment_post_ID );
 		
 		$link = $text = $name = $post_title = $comment_content ='';
 		
@@ -240,10 +259,9 @@ class BDBP_Blog_Comment_Notifier {
 		} else {
 			$name = $comment->comment_author;
 		}
-		
-		$post_title = $post->post_title;
-		
-		$comment_content = wp_trim_words( $comment->comment_content, 12,  ' ...' );
+
+		$post_title      = $post->post_title;
+		$comment_content = wp_trim_words( $comment->comment_content, 12, ' ...' );
 		
         $text = sprintf(
             __( '%s commented on <strong>%s</strong>: <em>%s</em>', 'bp-notify-post-author-on-blog-comment' ),
@@ -251,13 +269,11 @@ class BDBP_Blog_Comment_Notifier {
             $post_title,
             $comment_content
         );
-		
+
 		if ( $comment->comment_approved == 1 ) {
-
-				$link = get_comment_link ( $comment );
-
+			$link = get_comment_link( $comment );
 		} else {
-			$link =admin_url( 'comment.php?action=approve&c=' . $comment_id );
+			$link = admin_url( 'comment.php?action=approve&c=' . $comment_id );
 		}
 
 		if( $switched ) {
@@ -265,18 +281,15 @@ class BDBP_Blog_Comment_Notifier {
 		}
 
 		if ( $format == 'string' ) {
-		
-		 return apply_filters( 'bp_blog_notieifier_new_comment_notification_string', '<a href="' . $link . '">' . $text . '</a>' );
-		
-		}else{
-		 
-        return array(
-                'link'  => $link,
-                'text'  => $text);
-     
+			return apply_filters( 'bp_blog_notieifier_new_comment_notification_string', '<a href="' . $link . '">' . $text . '</a>' );
+		} else {
+			return array(
+				'link' => $link,
+				'text' => $text,
+			);
 		}
     
-	return false;
+		return false;
 	}
 
 	/**
@@ -293,25 +306,24 @@ class BDBP_Blog_Comment_Notifier {
 		
 		return false;
 	}
-	
-	
+
 	/**
 	 * Was the comment already added to bp notification?
 	 * 
-	 * @param type $comment_id
+	 * @param int $comment_id Comment id.
+	 *
 	 * @return boolean
 	 */
 	public function is_notified( $comment_id ) {
-		
 		return get_comment_meta( $comment_id, 'bd_post_author_notified', true );
 	}
+
 	/**
 	 * Mark that a comment was notified to the post author
 	 * 
-	 * @param int $comment_id
+	 * @param int $comment_id Comment id.
 	 */
 	public function mark_notified( $comment_id ) {
-		
 		update_comment_meta( $comment_id, 'bd_post_author_notified', 1 );
 	}
 	
@@ -321,33 +333,41 @@ class BDBP_Blog_Comment_Notifier {
 	 * @param int $comment_id
 	 */
 	public function unmark_notified( $comment_id ) {
-		
 		delete_comment_meta( $comment_id, 'bd_post_author_notified' );
 	}
-	
-	public function notify( $user_id, $comment ) {
-	
-		$comment_id = $comment->comment_ID;
-		$notificatin_id = bp_notifications_add_notification( array(
-                   
-                   'item_id'            => $comment_id,
-                   'user_id'            => $user_id,
-                   'component_name'     => $this->id,
-                   'component_action'   => 'new_blog_comment_'. $comment_id,
-                   'secondary_item_id'  => $comment->comment_post_ID,
-                ));
 
-		if ( $notificatin_id && is_multisite() ) {
-			bp_notifications_add_meta( $notificatin_id, '_blog_id', get_current_blog_id() );
+	/**
+	 * Notify author
+	 *
+	 * @param int        $user_id User id.
+	 * @param WP_Comment $comment WP Comment object.
+	 */
+	public function notify( $user_id, $comment ) {
+		$comment_id = $comment->comment_ID;
+
+		$notification_id = bp_notifications_add_notification(
+			array(
+				'item_id'           => $comment_id,
+				'user_id'           => $user_id,
+				'component_name'    => $this->id,
+				'component_action'  => 'new_blog_comment_' . $comment_id,
+				'secondary_item_id' => $comment->comment_post_ID,
+			)
+		);
+
+		if ( $notification_id && is_multisite() ) {
+			bp_notifications_add_meta( $notification_id, '_blog_id', get_current_blog_id() );
 		}
 		
 		$this->mark_notified( $comment_id );
-		
-		
 	}
 
+	/**
+	 * Mark read
+	 *
+	 * @return false|int|void
+	 */
 	public function mark_read() {
-
 
         if ( ! $this->is_bp_active() || ! is_singular() ) {
 			return ;
@@ -361,19 +381,17 @@ class BDBP_Blog_Comment_Notifier {
 
 		return BP_Notifications_Notification::update(
 			array( 'is_new' => 0 ),
-			array( 'secondary_item_id' => $post_id,
-			       'component_name'    => $this->id,
-			       'user_id'           => get_current_user_id(),
-				)
-			);
-
-
+			array(
+				'secondary_item_id' => $post_id,
+				'component_name'    => $this->id,
+				'user_id'           => get_current_user_id(),
+			)
+		);
 	}
 	
 	//we need to delete all notification for the user when he/she visits the single blog post?
 	//no, we won't as there is no sure way to know if the user has seen a comment on the front end or not
-	
-	
 }
+
 //initialize
 BDBP_Blog_Comment_Notifier::get_instance();
