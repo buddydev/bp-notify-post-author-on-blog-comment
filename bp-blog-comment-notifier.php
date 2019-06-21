@@ -5,7 +5,7 @@
  * Author: BuddyDev
  * Author URI: https://buddydev.com/
  * Description: Notify the Blog post author of any new comment on their blog post
- * Version: 1.0.5
+ * Version: 1.0.6
  * License: GPL
  * Text Domain: bp-notify-post-author-on-blog-comment
  * Domain Path: /languages/
