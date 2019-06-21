@@ -345,6 +345,11 @@ class BDBP_Blog_Comment_Notifier {
 	public function notify( $user_id, $comment ) {
 		$comment_id = $comment->comment_ID;
 
+		// If blog forum commenting not disable.
+		if ( bp_is_active( 'blogs' ) && ! bp_disable_blogforum_comments() ) {
+			return;
+		}
+
 		$notification_id = bp_notifications_add_notification(
 			array(
 				'item_id'           => $comment_id,
