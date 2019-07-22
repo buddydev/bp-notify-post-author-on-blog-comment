@@ -3,7 +3,7 @@ Contributors: buddydev, raviousprime, sbrajesh, bazalt
 Tags: buddypress, post comment notification
 Requires at least: 2.4+
 Tested up to: 2.9.2
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,9 @@ For more details, Please see the plugin documentation page.
 2. User notification screen  screenshot-2.png
 
 == Changelog ==
+
+= 1.0.7 =
+* Fix bug of non logged in user commenting on post.
 
 = 1.0.6 =
 * Fix bug of duplicate notification while reply comment.
