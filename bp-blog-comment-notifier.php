@@ -73,7 +73,7 @@ class BDBP_Blog_Comment_Notifier {
         //add_action( 'spam_comment', array( $this, 'comment_deleted' ) );
         //should we do something on the action untrash_comment & unspam_comment
 
-        add_action( 'wp_set_comment_status', array( $this, 'comment_status_changed' ) );
+        add_action( 'wp_set_comment_status', array( $this, 'comment_status_changed' ), 10, 2 );
 
         // Load plugin text domain
         add_action( 'bp_init', array( $this, 'load_textdomain' ) );
@@ -165,20 +165,20 @@ class BDBP_Blog_Comment_Notifier {
 	 * @return mixed
 	 */
 	public function comment_status_changed( $comment_id = 0, $comment_status = 0 ) {
-		
+
 		if ( ! $this->is_bp_active() ) {
 			return;
 		}
-		
+
 		$comment = get_comment( $comment_id );
-		
+
 		if ( empty( $comment ) ) {
 			return;
 		}
 
 		//we are only interested in 2 cases
 		//1. comment is notified and then it was marked as deleted or spam?
-		if (  $comment->comment_approved == 'spam' || $comment->comment_approve == 'trash'  ) {
+		if (  $comment_status == 'spam' || $comment_status == 'trash'  ) {
 			
 			if ( $this->is_notified( $comment_id ) ) {
 				$this->comment_deleted( $comment_id );
@@ -188,21 +188,21 @@ class BDBP_Blog_Comment_Notifier {
 		}
 		
 		//if an apprived comment is marked as pending,  delete notification
-		if ( $comment->comment_approve == 0 && $this->is_notified( $comment_id ) ) {
+		if ( $comment_status == 0 && $this->is_notified( $comment_id ) ) {
 			$this->comment_deleted( $comment_id );
 
 			return;
 		}
-		
-		if ( $comment->comment_approve == 1 ) {
+
+		if ( $comment_status == 'approve' ) {
 			$post = get_post( $comment->comment_post_ID );
-			
+
 			if ( get_current_user_id() == $post->post_author ) {
-				
+
 				if ( $this->is_notified( $comment_id ) ) {
 					$this->comment_deleted ( $comment_id );
 				}
-				
+
 				return;
 			} else {
 				//if approver is not the author
